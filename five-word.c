@@ -1,4 +1,6 @@
 #include "five-word.h"
+#include <stdint.h>
+#include <stdio.h>
 
 
 int main(int argc, char *argv[]){
@@ -50,6 +52,7 @@ uint8_t LoadWordFile(FILE *WordFile){
 
     while (fgets(AllWords[wordIndex].Chars, MaxWordLength, WordFile)){
         char *currentWord = AllWords[wordIndex].Chars;
+        AllWords[wordIndex].LetterMask = 0;
         validWord = 1;
 
         if (currentWord[5] == '\r'){ //if 5 letter word
@@ -60,20 +63,35 @@ uint8_t LoadWordFile(FILE *WordFile){
                     return 1;
                 }
                 else{
-                    if (AllWords[wordIndex].LetterMask & (1 << (currentWord[i] - 'a'))){
+                    if (AllWords[wordIndex].LetterMask & (1U << (currentWord[i] - 'a'))){
                         validWord = 0;
                         break;
                     }
                     else{
-                        AllWords[wordIndex].LetterMask |= (1 << (currentWord[i] - 'a'));
-                        printf("Test: %s, %u\n", currentWord, wordIndex);
+                        AllWords[wordIndex].LetterMask |= (1U << (currentWord[i] - 'a'));
+                        //printf("Test: %s, %u\n", currentWord, wordIndex);
                     }
                 }
             }
             
         }
+        else {
+            validWord = 0;
+        }
         if (validWord){
-            wordIndex++;
+            //printf("Valid\n");
+            uint8_t is_anagram = 0;
+            for (int i = 0; i < wordIndex; i++){
+                if (AllWords[i].LetterMask == AllWords[wordIndex].LetterMask){
+                    is_anagram = 1;
+                    //printf("Anagram: %s, %s, %u\n", AllWords[wordIndex].Chars, AllWords[i].Chars, AllWords[i].LetterMask);
+                    break;
+                }
+            }
+            if (is_anagram == 0){
+                wordIndex++;
+                //printf("Increment\n");
+            }
         }
     }
     printf("Valid word count: %u\n", wordIndex);
