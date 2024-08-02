@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -14,6 +15,7 @@ typedef struct WordStruct{
     char Chars[MaxWordLength];
     uint32_t LetterMask;
     uint32_t Intersects[MaxIntersects];
+    uint32_t numIntersects;
 
 } Word;
 
@@ -25,4 +27,5 @@ pthread_mutex_t CalcMutex;
 pthread_mutex_t OutputMutex;
 
 
-uint8_t LoadWordFile(FILE *WordFile);
+uint32_t LoadWordFile(FILE *WordFile);
+void GetIntersects(Word *wordList, uint32_t numWords);

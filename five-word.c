@@ -1,6 +1,4 @@
 #include "five-word.h"
-#include <stdint.h>
-#include <stdio.h>
 
 
 int main(int argc, char *argv[]){
@@ -35,18 +33,31 @@ int main(int argc, char *argv[]){
         printf("ERR: Could not allocate main word array\n");
         return 1;
     }
-
-    if (LoadWordFile(WordFile) == 1){
+    
+    WordCount = LoadWordFile(WordFile);
+    if (WordCount < 5){
+        printf("ERR: Word file contains less than 5 valid words.");
         return 1;
     }
+
     fclose(WordFile);
-        
+    
+    WordList = malloc(sizeof(Word) * WordCount);
+    memcpy(WordList, AllWords, WordCount * sizeof(Word));
+    free(AllWords);
+
+    //Test to see if memcpy is working
+    /*printf("WordCount: %u\n", WordCount);
+    for (int i = 0; i < WordCount; i++){
+        printf("%s\n", WordList[i].Chars);
+    }*/
+
+    GetIntersects(WordList, WordCount);
 }
 
 
 
-uint8_t LoadWordFile(FILE *WordFile){
-    WordCount = 0;
+uint32_t LoadWordFile(FILE *WordFile){
     uint32_t wordIndex = 0;
     uint32_t validWord = 1;
 
@@ -95,7 +106,21 @@ uint8_t LoadWordFile(FILE *WordFile){
         }
     }
     printf("Valid word count: %u\n", wordIndex);
-    return 0;
+
+    return wordIndex;
 }
 
+void GetIntersects(Word *wordList, uint32_t numWords){
+   for (uint32_t i = 0; i < numWords - 2; i++){
+       Word *word = &(wordList[i]);
+       word->numIntersects = 0;
+       for (uint32_t j = i + 1; j < numWords - 1; j++){
+           Word *matchWord = &(wordList[j]);
 
+           if ((word->LetterMask & matchWord->LetterMask) == 0){
+               word->Intersects[word->numIntersects] = j;
+               word->numIntersects++;
+           }
+       }
+   } 
+}
