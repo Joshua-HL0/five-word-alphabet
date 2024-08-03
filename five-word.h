@@ -24,7 +24,10 @@ uint32_t WordCount;
 uint32_t ComboCount;
 pthread_mutex_t CalcMutex;
 pthread_mutex_t OutputMutex;
+pthread_t Threads[128];
+uint8_t Pause;
 
 
 uint32_t LoadWordFile(FILE *WordFile);
 void GetIntersects(Word *wordList, uint32_t numWords);
+void *Calc(void* arg);

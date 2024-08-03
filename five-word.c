@@ -13,6 +13,15 @@ int main(int argc, char *argv[]){
         printf("ERR: Thread count must be between 1 and %d\n", MaxThreads);
         return 1;
     }
+   
+    Pause = 1;
+
+    for (uint32_t i = 0; i < ThreadCount; i++){
+        int thr = pthread_create(&(Threads[i]), NULL, &Calc, NULL);
+        if (thr){
+            printf("ERR: Could not create thread %d", thr);
+        }
+    }
 
     if (pthread_mutex_init(&CalcMutex, NULL)){
         printf("ERR: Could not initialise calculation mutex\n");
@@ -53,6 +62,12 @@ int main(int argc, char *argv[]){
     }*/
 
     GetIntersects(WordList, WordCount);
+        
+    Pause = 0;
+
+    for (uint32_t i = 0; i < ThreadCount; i++){
+        pthread_join(Threads[i], NULL);
+    }
 }
 
 
@@ -123,4 +138,14 @@ void GetIntersects(Word *wordList, uint32_t numWords){
            }
        }
    } 
+}
+
+void *Calc(void* arg){
+    while (Pause){
+
+    }
+
+    while (1){
+
+    }
 }
