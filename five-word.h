@@ -26,6 +26,7 @@ pthread_mutex_t CalcMutex;
 pthread_mutex_t OutputMutex;
 pthread_t Threads[128];
 uint8_t Pause;
+uint32_t currentIndex; // Index of word currently being worked on
 
 
 uint32_t LoadWordFile(FILE *WordFile);

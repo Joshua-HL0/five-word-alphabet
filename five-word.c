@@ -1,4 +1,8 @@
 #include "five-word.h"
+#include <cstdint>
+#include <pthread.h>
+#include <stdint.h>
+#include <stdio.h>
 
 
 int main(int argc, char *argv[]){
@@ -141,11 +145,55 @@ void GetIntersects(Word *wordList, uint32_t numWords){
 }
 
 void *Calc(void* arg){
+
+    uint32_t wordIndex;
+
     while (Pause){
 
     }
 
     while (1){
+        pthread_mutex_lock(&CalcMutex);
+        wordIndex = currentIndex;
+        currentIndex++;
+        pthread_mutex_unlock(&CalcMutex);
 
+        if (wordIndex >= WordCount){
+            return 0; // Word list has been exhausted
+        }
+
+        Word *WordPtr = &(WordList[wordIndex]);
+        if (WordPtr->numIntersects < 4){
+            continue;
+        }
+
+        for (int Word2 = 0; Word2 < WordPtr->numIntersects; Word2++){
+            Word *Word2Ptr = &(WordList[WordPtr->Intersects[Word2]]);
+            uint32_t word2Intersects = 10; // 10 is arbitrary, Get intersect of the 2 intersect arrays (should come up with another word better than intersect)
+            
+            if (word2Intersects >=  3){
+                for (int Word3 = 0; Word3 < word2Intersects; Word3++){
+                    Word *Word3Ptr = &(WordList[WordPtr->Intersects[Word3]]); // Using WordPtr intersects should be using 1 and 2 intersect array, but not implemented yet
+                    uint32_t word3Intersects = 9; // Again arbitrary, will implement in future
+
+                    if (word3Intersects >= 2){
+                        for (int Word4 = 0; Word4 < word3Intersects; Word4++){
+                            Word *Word4Ptr = &(WordList[WordPtr->Intersects[Word4]]); // Same with last, incorrect since not implemented
+                            uint32_t word4Intersects = 8;
+
+                            if (word4Intersects){
+                                for (int Word5 = 0; Word5 < word4Intersects; Word5++){
+                                    Word *Word5Ptr = &(WordList[WordPtr->Intersects[Word5]]); // You get the idea
+                                    pthread_mutex_lock(&OutputMutex);
+                                    ComboCount++;
+                                    printf("%u: %s, %s, %s, %s, %s\n", ComboCount, WordPtr->Chars, Word2Ptr->Chars, Word3Ptr->Chars, Word4Ptr->Chars, Word5Ptr->Chars);
+                                    pthread_mutex_unlock(&OutputMutex);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
