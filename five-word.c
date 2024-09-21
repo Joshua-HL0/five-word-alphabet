@@ -1,8 +1,5 @@
 #include "five-word.h"
-#include <cstdint>
-#include <pthread.h>
 #include <stdint.h>
-#include <stdio.h>
 
 
 int main(int argc, char *argv[]){
@@ -132,13 +129,13 @@ uint32_t LoadWordFile(FILE *WordFile){
 void GetIntersects(Word *wordList, uint32_t numWords){
    for (uint32_t i = 0; i < numWords - 2; i++){
        Word *word = &(wordList[i]);
-       word->numIntersects = 0;
+       word->Intersects.numIntersects = 0;
        for (uint32_t j = i + 1; j < numWords - 1; j++){
            Word *matchWord = &(wordList[j]);
 
            if ((word->LetterMask & matchWord->LetterMask) == 0){
-               word->Intersects[word->numIntersects] = j;
-               word->numIntersects++;
+               word->Intersects.IntersectArr[word->Intersects.numIntersects] = j;
+               word->Intersects.numIntersects++;
            }
        }
    } 
@@ -147,6 +144,8 @@ void GetIntersects(Word *wordList, uint32_t numWords){
 void *Calc(void* arg){
 
     uint32_t wordIndex;
+    IntersectS Second, Third, Fourth, Fifth;
+    
 
     while (Pause){
 
@@ -163,27 +162,27 @@ void *Calc(void* arg){
         }
 
         Word *WordPtr = &(WordList[wordIndex]);
-        if (WordPtr->numIntersects < 4){
+        if (WordPtr->Intersects.numIntersects < 4){
             continue;
         }
 
-        for (int Word2 = 0; Word2 < WordPtr->numIntersects; Word2++){
-            Word *Word2Ptr = &(WordList[WordPtr->Intersects[Word2]]);
-            uint32_t word2Intersects = 10; // 10 is arbitrary, Get intersect of the 2 intersect arrays (should come up with another word better than intersect)
+        for (int Word2 = 0; Word2 < WordPtr->Intersects.numIntersects; Word2++){
+            Word *Word2Ptr = &(WordList[WordPtr->Intersects.IntersectArr[Word2]]);
+            uint32_t word2Intersects = GetCommonWords(&WordPtr->Intersects, &Word2Ptr->Intersects, &Third);
             
             if (word2Intersects >=  3){
                 for (int Word3 = 0; Word3 < word2Intersects; Word3++){
-                    Word *Word3Ptr = &(WordList[WordPtr->Intersects[Word3]]); // Using WordPtr intersects should be using 1 and 2 intersect array, but not implemented yet
-                    uint32_t word3Intersects = 9; // Again arbitrary, will implement in future
+                    Word *Word3Ptr = &(WordList[Third.IntersectArr[Word3]]);
+                    uint32_t word3Intersects = GetCommonWords(&Third, &WordPtr->Intersects, &Fourth);
 
                     if (word3Intersects >= 2){
                         for (int Word4 = 0; Word4 < word3Intersects; Word4++){
-                            Word *Word4Ptr = &(WordList[WordPtr->Intersects[Word4]]); // Same with last, incorrect since not implemented
-                            uint32_t word4Intersects = 8;
+                            Word *Word4Ptr = &(WordList[Fourth.IntersectArr[Word4]]);
+                            uint32_t word4Intersects = GetCommonWords(&Fourth, &Word4Ptr->Intersects, &Fifth);
 
                             if (word4Intersects){
                                 for (int Word5 = 0; Word5 < word4Intersects; Word5++){
-                                    Word *Word5Ptr = &(WordList[WordPtr->Intersects[Word5]]); // You get the idea
+                                    Word *Word5Ptr = &(WordList[Fifth.IntersectArr[Word5]]);
                                     pthread_mutex_lock(&OutputMutex);
                                     ComboCount++;
                                     printf("%u: %s, %s, %s, %s, %s\n", ComboCount, WordPtr->Chars, Word2Ptr->Chars, Word3Ptr->Chars, Word4Ptr->Chars, Word5Ptr->Chars);
@@ -196,4 +195,8 @@ void *Calc(void* arg){
             }
         }
     }
+}
+
+uint32_t GetCommonWords(IntersectS *IntersectsA, IntersectS *IntersectsB, IntersectS *out){ //will return number of common words
+
 }

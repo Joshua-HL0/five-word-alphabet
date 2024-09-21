@@ -10,11 +10,15 @@
 #define MaxWordLength 64
 #define MaxThreads 64
 
+typedef struct IntersectStruct{  //      Needs its own struct because GetCommonWords() needs to return a usable formatted list
+    uint32_t IntersectArr[MaxIntersects];
+    uint32_t numIntersects;
+} IntersectS;
+
 typedef struct WordStruct{
     char Chars[MaxWordLength];
     uint32_t LetterMask;
-    uint32_t Intersects[MaxIntersects];
-    uint32_t numIntersects;
+    IntersectS Intersects;
 
 } Word;
 
@@ -32,3 +36,4 @@ uint32_t currentIndex; // Index of word currently being worked on
 uint32_t LoadWordFile(FILE *WordFile);
 void GetIntersects(Word *wordList, uint32_t numWords);
 void *Calc(void* arg);
+uint32_t GetCommonWords(IntersectS *IntersectsA, IntersectS *IntersectsB, IntersectS *out);
