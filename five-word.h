@@ -29,7 +29,7 @@ uint32_t ComboCount;
 pthread_mutex_t CalcMutex;
 pthread_mutex_t OutputMutex;
 pthread_t Threads[128];
-uint8_t Pause;
+volatile uint8_t Pause;     // took me way too long to realise not being volatile is why the pause loop wasn't exiting
 uint32_t currentIndex; // Index of word currently being worked on
 
 
