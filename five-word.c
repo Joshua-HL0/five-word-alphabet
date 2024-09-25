@@ -1,7 +1,4 @@
 #include "five-word.h"
-#include <stdint.h>
-#include <stdio.h>
-
 
 int main(int argc, char *argv[]){
 
@@ -19,7 +16,9 @@ int main(int argc, char *argv[]){
     Pause = 1;
 
     for (uint32_t i = 0; i < ThreadCount; i++){
-        int thr = pthread_create(&(Threads[i]), NULL, &Calc, NULL);
+        uint32_t* id = malloc(sizeof(uint32_t));
+        *id = i;
+        int thr = pthread_create(&(Threads[i]), NULL, &Calc, (void*)id);
         if (thr){
             printf("ERR: Could not create thread %d", thr);
         }
@@ -64,17 +63,17 @@ int main(int argc, char *argv[]){
     }*/
 
     GetIntersects(WordList, WordCount);
-    
-    int num = 93;
+
+    /*int num = 93;
     Word *word = &(WordList[num]);
 
     printf("Test: Word: %s, num: %u, intersects:\n", word->Chars, num);
     for (int i = 0; i < word->Intersects.numIntersects; i++){
         printf("%s,  %u\n", WordList[word->Intersects.IntersectArr[i]].Chars, word->Intersects.IntersectArr[i]);
-    }
+    }*/
 
     Pause = 0;
-    printf("Pause is 0\n");
+    //printf("Pause is 0\n");
 
     for (uint32_t i = 0; i < ThreadCount; i++){
         pthread_join(Threads[i], NULL);
@@ -106,7 +105,6 @@ uint32_t LoadWordFile(FILE *WordFile){
                     }
                     else{
                         AllWords[wordIndex].LetterMask |= (1U << (currentWord[i] - 'a'));
-                        //printf("Test: %s, %u\n", currentWord, wordIndex);
                     }
                 }
             }
@@ -127,7 +125,6 @@ uint32_t LoadWordFile(FILE *WordFile){
             }
             if (is_anagram == 0){
                 wordIndex++;
-                //printf("Increment\n");
             }
         }
     }
@@ -137,7 +134,6 @@ uint32_t LoadWordFile(FILE *WordFile){
 }
 
 void GetIntersects(Word *wordList, uint32_t numWords){
-    printf("starting getintersects with %u words\n", numWords);
    for (uint32_t i = 0; i < numWords - 2; i++){
        Word *word = &(wordList[i]);
        word->Intersects.numIntersects = 0;
@@ -147,29 +143,21 @@ void GetIntersects(Word *wordList, uint32_t numWords){
            if ((word->LetterMask & matchWord->LetterMask) == 0){
                word->Intersects.IntersectArr[word->Intersects.numIntersects] = j;
                word->Intersects.numIntersects++;
-               if (word->Intersects.numIntersects >= MaxIntersects){
-                   printf("Warning: Reached MaxIntersects(%d) for word %u\n", MaxIntersects, i);
-               }
            }
        }
 
    }
-   printf("Finished getIntersects\n");
 }
 
 void *Calc(void* arg){
-    uint32_t threadId = (uint32_t)(uintptr_t)arg;
+    uint32_t threadId = *((uintptr_t*)arg);
     printf("Thread %u started\n", threadId);
 
     uint32_t wordIndex;
     IntersectS Third, Fourth, Fifth;
-    
-    printf("Thread got to pause\n");
-    while (Pause != 0){
-        //printf("%u", Pause); 
-    }
 
-    printf("Thread exited pause loop\n");
+    while (Pause != 0){
+    }
 
     while (1){
         pthread_mutex_lock(&CalcMutex);
@@ -178,7 +166,7 @@ void *Calc(void* arg){
         pthread_mutex_unlock(&CalcMutex);
 
         if (wordIndex >= WordCount){
-            printf("Thread exiting: wordIndex (%u) >= wordCount (%u)\n", wordIndex, WordCount);
+            printf("Thread %u exiting\n", threadId);
             return 0; // Word list has been exhausted
         }
 
@@ -194,7 +182,7 @@ void *Calc(void* arg){
             if (word2Intersects >=  3){
                 for (int Word3 = 0; Word3 < word2Intersects; Word3++){
                     Word *Word3Ptr = &(WordList[Third.IntersectArr[Word3]]);
-                    uint32_t word3Intersects = GetCommonWords(&Third, &WordPtr->Intersects, &Fourth);
+                    uint32_t word3Intersects = GetCommonWords(&Third, &Word3Ptr->Intersects, &Fourth);
 
                     if (word3Intersects >= 2){
                         for (int Word4 = 0; Word4 < word3Intersects; Word4++){
@@ -202,12 +190,11 @@ void *Calc(void* arg){
                             uint32_t word4Intersects = GetCommonWords(&Fourth, &Word4Ptr->Intersects, &Fifth);
 
                             if (word4Intersects){
-                                //printf("word4inters: %u\n", word4Intersects);
                                 for (int Word5 = 0; Word5 < word4Intersects; Word5++){
                                     Word *Word5Ptr = &(WordList[Fifth.IntersectArr[Word5]]);
                                     pthread_mutex_lock(&OutputMutex);
                                     ComboCount++;
-                                    //printf("%u: %s, %s, %s, %s, %s\n", ComboCount, WordPtr->Chars, Word2Ptr->Chars, Word3Ptr->Chars, Word4Ptr->Chars, Word5Ptr->Chars);
+                                    printf("%u: %s, %s, %s, %s, %s\n", ComboCount, WordPtr->Chars, Word2Ptr->Chars, Word3Ptr->Chars, Word4Ptr->Chars, Word5Ptr->Chars);
                                     pthread_mutex_unlock(&OutputMutex);
                                 }
                             }
