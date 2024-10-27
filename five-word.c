@@ -64,16 +64,9 @@ int main(int argc, char *argv[]){
 
     GetIntersects(WordList, WordCount);
 
-    /*int num = 93;
-    Word *word = &(WordList[num]);
 
-    printf("Test: Word: %s, num: %u, intersects:\n", word->Chars, num);
-    for (int i = 0; i < word->Intersects.numIntersects; i++){
-        printf("%s,  %u\n", WordList[word->Intersects.IntersectArr[i]].Chars, word->Intersects.IntersectArr[i]);
-    }*/
 
     Pause = 0;
-    //printf("Pause is 0\n");
 
     for (uint32_t i = 0; i < ThreadCount; i++){
         pthread_join(Threads[i], NULL);
@@ -119,7 +112,6 @@ uint32_t LoadWordFile(FILE *WordFile){
             for (int i = 0; i < wordIndex; i++){
                 if (AllWords[i].LetterMask == AllWords[wordIndex].LetterMask){
                     is_anagram = 1;
-                    //printf("Anagram: %s, %s, %u\n", AllWords[wordIndex].Chars, AllWords[i].Chars, AllWords[i].LetterMask);
                     break;
                 }
             }
